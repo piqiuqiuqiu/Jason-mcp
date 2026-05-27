@@ -1,0 +1,36 @@
+services:
+  jason-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: JasonMCP
+    ports:
+      - "8809:8000"
+    volumes:
+      # 持久化目录 - 使用宿主机绝对路径
+      - C:\Users\Hnxz_\gemini\Notion-mcp\NotionMcp-V0.2\downloads:/app/downloads
+      - C:\Users\Hnxz_\gemini\Notion-mcp\NotionMcp-V0.2\logs:/app/logs
+      - C:\Users\Hnxz_\gemini\Notion-mcp\NotionMcp-V0.2\store:/app/store
+      # OpenClaw workspace 共享目录
+      - C:\Users\Hnxz_\.openclaw\workspace\files:/app/files
+      - C:\Users\Hnxz_\.openclaw\workspace\resources:/app/resources
+      # 源码目录挂载（开发模式）
+      - C:\Users\Hnxz_\gemini\Notion-mcp\NotionMcp-V0.2\server:/app/server
+      # SSH Key (只读) + Docker Socket
+      - C:\Users\Hnxz_\.ssh:/app/.ssh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    networks:
+      - jason-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  jason-network:
+    external: true
+    name: notion-mcp_default
